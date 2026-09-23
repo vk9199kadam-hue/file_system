@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-export default function VersionHistoryDrawer({ file, isOpen, onClose, onRestoreClick }) {
+export default function VersionHistoryDrawer({ file, isOpen, onClose, onRestoreClick, onDownloadClick }) {
   const [versionData, setVersionData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -60,17 +60,27 @@ export default function VersionHistoryDrawer({ file, isOpen, onClose, onRestoreC
                     <p>Chunks Count: {ver.chunks_count}</p>
                   </div>
 
-                  <button
-                    onClick={() => onRestoreClick(file, ver.version_id)}
-                    className="w-full bg-slate-100 hover:bg-indigo-600 hover:text-white text-slate-700 text-xs font-medium py-1.5 rounded-lg border transition-all"
-                  >
-                    Restore Version {ver.version_id}
-                  </button>
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <button
+                      onClick={() => onDownloadClick && onDownloadClick(file, ver.version_id)}
+                      className="bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 text-xs font-medium py-1.5 rounded-lg border border-emerald-200 transition-all flex items-center justify-center space-x-1"
+                    >
+                      <span>📥</span>
+                      <span>Download</span>
+                    </button>
+                    <button
+                      onClick={() => onRestoreClick(file, ver.version_id)}
+                      className="bg-slate-100 hover:bg-indigo-600 hover:text-white text-slate-700 text-xs font-medium py-1.5 rounded-lg border transition-all"
+                    >
+                      Restore {ver.version_id}
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </div>
+
 
         <button
           onClick={onClose}
