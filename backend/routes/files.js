@@ -68,8 +68,11 @@ router.patch("/:fileId", requireRoles([SYSTEM_ROLES.IT_ADMIN]), (req, res, next)
   } catch (err) {
     next(err);
   }
+});
+
 // GET /api/v1/ui/files/:fileId/download -> Download verified backup file
 router.get("/:fileId/download", (req, res, next) => {
+
   try {
     const file = aggregationService.getFiles().find(f => f.file_id === req.params.fileId);
     if (!file) {
