@@ -1,21 +1,17 @@
 import { Router } from "express";
+import { aggregationService } from "../services/aggregationService.js";
+import { createSuccessEnvelope } from "../../contracts/response-envelopes.js";
 
 const router = Router();
 
-// GET /api/v1/ui/dashboard -> aggregated storage/scheduling/alerts summary
-router.get("/", (req, res) => {
-  res.json({
-    data: {
-      storageUsedGB: 128.4,
-      storageTotalGB: 500,
-      activeJobs: 3,
-      queueDepth: 5,
-      recentAlerts: [
-        { level: "warning", message: "Verification degraded for backup bkp-991" },
-      ],
-    },
-    meta: { lastUpdated: new Date().toISOString() },
-  });
+// GET /api/v1/ui/dashboard -> Live operations dashboard summary (<200ms target) (D3)
+router.get("/", (req, res, next) => {
+  try {
+    const summary = aggregationService.getDashboardSummary();
+    res.json(createSuccessEnvelope(summary, req.correlationId));
+  } catch (err) {
+    next(err);
+  }
 });
 
 export default router;

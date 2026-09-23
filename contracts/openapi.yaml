@@ -1,0 +1,332 @@
+openapi: 3.0.3
+info:
+  title: Smart File Backup System - Team D Master API
+  description: Master OpenAPI contract for Team D Web Frontend & Backend-For-Frontend (BFF), orchestrating Teams A, B, and C.
+  version: 1.0.0
+servers:
+  - url: http://localhost:4000/api/v1
+    description: Team D Local BFF Server
+
+paths:
+  /ui/session:
+    post:
+      summary: User authentication & role session login
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, role]
+              properties:
+                username:
+                  type: string
+                  example: "tejashree"
+                role:
+                  type: string
+                  enum: [Employee, IT Admin, Auditor]
+                  example: "IT Admin"
+      responses:
+        '200':
+          description: Session created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+    delete:
+      summary: User logout & session termination
+      operationId: logout
+      responses:
+        '200':
+          description: Session terminated successfully
+
+  /ui/me:
+    get:
+      summary: Get currently authenticated user details
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: Current user information
+
+  /ui/files:
+    get:
+      summary: Browse files, versions, and backup statuses
+      operationId: listFiles
+      responses:
+        '200':
+          description: Array of available file metadata
+
+  /ui/files/{fileId}:
+    patch:
+      summary: Update file retention policy or storage location (IT Admin)
+      operationId: updateFilePolicy
+      parameters:
+        - name: fileId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                retention_days:
+                  type: integer
+                  example: 90
+                storage_class:
+                  type: string
+                  example: "COLD_STORAGE"
+      responses:
+        '200':
+          description: File policy updated
+
+  /ui/backups:
+    post:
+      summary: Schedule a file backup operation
+      operationId: startBackup
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BackupRequest'
+      responses:
+        '202':
+          description: Backup request accepted and queued
+
+  /ui/backups/{backupId}:
+    get:
+      summary: Check status and state machine progress of a backup
+      operationId: getBackupStatus
+      parameters:
+        - name: backupId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Detailed backup state, worker lease, dedup ratio, and Merkle verification
+
+  /ui/restores:
+    post:
+      summary: Request file version restore
+      operationId: startRestore
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [file_id, version_id, target_path]
+              properties:
+                file_id:
+                  type: string
+                version_id:
+                  type: string
+                target_path:
+                  type: string
+      responses:
+        '202':
+          description: Restore operation queued
+
+  /ui/dashboard:
+    get:
+      summary: Fetch aggregated storage, queue depth, and alert summary (<200ms KPI)
+      operationId: getDashboardSummary
+      responses:
+        '200':
+          description: Aggregated telemetry data
+
+  /ui/stream:
+    get:
+      summary: Server-Sent Events (SSE) / Socket real-time stream relay
+      operationId: getLiveStream
+      responses:
+        '200':
+          description: Event stream connection established
+
+  /ui/integrity:
+    get:
+      summary: Get Merkle tree verification status & chunk hash index
+      operationId: getIntegrityReport
+      responses:
+        '200':
+          description: Merkle verification details
+
+  /ui/reports/storage:
+    get:
+      summary: Storage breakdown report (IT Admin & Auditor)
+      operationId: getStorageReport
+      responses:
+        '200':
+          description: Storage breakdown details
+
+components:
+  schemas:
+    BackupRequest:
+      type: object
+      required: [backup_id, user_id, file_id, backup_type, source_path, priority, idempotency_key]
+      properties:
+        backup_id:
+          type: string
+        user_id:
+          type: string
+        file_id:
+          type: string
+        backup_type:
+          type: string
+          enum: [FULL, DIFFERENTIAL, INCREMENTAL]
+        source_path:
+          type: string
+        priority:
+          type: integer
+          minimum: 1
+          maximum: 5
+        idempotency_key:
+          type: string
+
+    JobRequest:
+      type: object
+      required: [job_id, backup_id, required_workers, duration, priority, policy, submitted_at]
+      properties:
+        job_id:
+          type: string
+        backup_id:
+          type: string
+        required_workers:
+          type: integer
+        duration:
+          type: integer
+        priority:
+          type: integer
+        policy:
+          type: string
+        submitted_at:
+          type: string
+
+    AllocationDecision:
+      type: object
+      required: [decision_id, job_id, worker_ids, lease_id, state, scheduled_start, metrics]
+      properties:
+        decision_id:
+          type: string
+        job_id:
+          type: string
+        worker_ids:
+          type: array
+          items:
+            type: string
+        lease_id:
+          type: string
+        state:
+          type: string
+        scheduled_start:
+          type: string
+
+    ChunkRequest:
+      type: object
+      required: [chunk_request_id, file_id, chunk_size, hash_algorithm, version_ref]
+      properties:
+        chunk_request_id:
+          type: string
+        file_id:
+          type: string
+        chunk_size:
+          type: integer
+        hash_algorithm:
+          type: string
+        version_ref:
+          type: string
+
+    DedupResult:
+      type: object
+      required: [dedup_result_id, unique_chunks, duplicate_chunks, savings_ratio, merkle_root]
+      properties:
+        dedup_result_id:
+          type: string
+        unique_chunks:
+          type: integer
+        duplicate_chunks:
+          type: integer
+        savings_ratio:
+          type: number
+        merkle_root:
+          type: string
+
+    FileVersion:
+      type: object
+      required: [file_id, version_id, chunk_refs, state, size, checksum, retention_policy]
+      properties:
+        file_id:
+          type: string
+        version_id:
+          type: string
+        chunk_refs:
+          type: array
+          items:
+            type: string
+        state:
+          type: string
+        size:
+          type: string
+        checksum:
+          type: string
+        retention_policy:
+          type: string
+
+    SuccessEnvelope:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: object
+        meta:
+          type: object
+          properties:
+            correlation_id:
+              type: string
+            api_version:
+              type: string
+            timestamp:
+              type: string
+
+    ErrorEnvelope:
+      type: object
+      required: [error, meta]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: array
+              items:
+                type: object
+        meta:
+          type: object
+          properties:
+            correlation_id:
+              type: string
+            timestamp:
+              type: string

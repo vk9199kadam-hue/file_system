@@ -1,34 +1,51 @@
 import { Router } from "express";
+import { aggregationService } from "../services/aggregationService.js";
+import { createSuccessEnvelope, createErrorEnvelope } from "../../contracts/response-envelopes.js";
 
 const router = Router();
 
-// POST /api/v1/ui/backups -> start a backup
-router.post("/", (req, res) => {
-  const { file_id } = req.body;
-  // TODO: replace with real call to Team C's POST /api/v1/backups
-  res.json({
-    data: {
-      backup_id: "bkp-" + Date.now(),
-      file_id,
-      state: "QUEUED",
-      queue_position: 2,
-      estimated_start: new Date(Date.now() + 60000).toISOString(),
-    },
-    meta: { correlation_id: "corr-" + Date.now() },
-  });
+// POST /api/v1/ui/backups -> Schedule backup (D2)
+router.post("/", (req, res, next) => {
+  try {
+    const { file_id, backup_type, priority } = req.body;
+    const idempotencyKey = req.headers["idempotency-key"];
+    const vpnTunnelId = req.headers["x-vpn-tunnel-id"] || null;
+    const user = req.headers["x-username"] || "emp_rahul";
+
+    if (!file_id) {
+      return res.status(400).json(
+        createErrorEnvelope(
+          "INVALID_INPUT",
+          "Parameter 'file_id' is required to schedule a backup.",
+          [{ field: "file_id", issue: "missing" }],
+          req.correlationId
+        )
+      );
+    }
+
+    const backupResult = aggregationService.orchestrateBackup({
+      fileId: file_id,
+      backupPolicy: backup_type || "ROUND_ROBIN",
+      priority: Number(priority) || 3,
+      idempotencyKey,
+      vpnTunnelId,
+      user
+    });
+
+    res.status(202).json(createSuccessEnvelope(backupResult, req.correlationId));
+  } catch (err) {
+    next(err);
+  }
 });
 
-// GET /api/v1/ui/backups/:backupId -> check status
-router.get("/:backupId", (req, res) => {
-  res.json({
-    data: {
-      backup_id: req.params.backupId,
-      state: "COMMITTED",
-      dedup: { savings_ratio: 0.42 },
-      verification: { status: "VERIFIED" },
-    },
-    meta: {},
-  });
+// GET /api/v1/ui/backups/:backupId -> Get detailed backup status & queue position (D2)
+router.get("/:backupId", (req, res, next) => {
+  try {
+    const status = aggregationService.getBackupById(req.params.backupId);
+    res.json(createSuccessEnvelope(status, req.correlationId));
+  } catch (err) {
+    next(err);
+  }
 });
 
 export default router;

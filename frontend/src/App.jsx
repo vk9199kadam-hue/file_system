@@ -1,11 +1,14 @@
+import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./AuthContext.jsx";
 import Sidebar from "./components/Sidebar.jsx";
+import Navbar from "./components/Navbar.jsx";
 import Login from "./pages/Login.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Files from "./pages/Files.jsx";
 import Reports from "./pages/Reports.jsx";
 import Admin from "./pages/Admin.jsx";
+import Integrity from "./pages/Integrity.jsx";
 
 function Protected({ children, allowedRoles }) {
   const { user } = useAuth();
@@ -18,9 +21,12 @@ function Protected({ children, allowedRoles }) {
 
 function Layout({ children }) {
   return (
-    <div className="flex">
-      <Sidebar />
-      <main className="flex-1">{children}</main>
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900 antialiased">
+      <Navbar />
+      <div className="flex flex-1">
+        <Sidebar />
+        <main className="flex-1 overflow-x-hidden">{children}</main>
+      </div>
     </div>
   );
 }
@@ -45,6 +51,16 @@ function AppRoutes() {
           <Protected>
             <Layout>
               <Files />
+            </Layout>
+          </Protected>
+        }
+      />
+      <Route
+        path="/integrity"
+        element={
+          <Protected>
+            <Layout>
+              <Integrity />
             </Layout>
           </Protected>
         }

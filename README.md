@@ -10,7 +10,7 @@ swap in the real API call later.
 
 ## Folder structure
 
-```
+
 team-d-project/
 ├── backend/              # Express BFF (Team D's own API layer)
 │   ├── server.js
@@ -70,3 +70,25 @@ Open http://localhost:5173 — log in with any username and pick a role
 3. Add loading/error states everywhere (the doc's KPI: "100% backend
    error classes map to a clear message, retry or corrective action").
 4. Accessibility pass: keyboard navigation, focus states, ARIA labels.
+
+GET http://localhost:4000/api/v1/ui/me
+POST http://localhost:4000/api/v1/ui/session
+DELETE http://localhost:4000/api/v1/ui/session
+GET http://localhost:4000/api/v1/ui/files
+POST http://localhost:4000/api/v1/ui/files
+PATCH http://localhost:4000/api/v1/ui/files/:fileId
+GET http://localhost:4000/api/v1/ui/files/:fileId/versions
+POST 
+POST http://localhost:4000/api/v1/ui/backups
+GET http://localhost:4000/api/v1/ui/backups/:backupId
+GET http://localhost:4000/api/v1/ui/dashboard
+GET http://localhost:4000/api/v1/ui/integrity
+POST http://localhost:4000/api/v1/ui/integrity/verify/preview
+GET http://localhost:4000/api/v1/ui/reports/storage
+POST http://localhost:4000/api/v1/ui/restores
+
+
+Backend: http://localhost:4000
+Frontend: http://localhost:5173
+For Thunder Client / Postman use the backend URL:
+http://localhost:4000/api/v1/ui/... http://localhost:5173

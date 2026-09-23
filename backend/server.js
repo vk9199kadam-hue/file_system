@@ -3,55 +3,87 @@ import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
 
+import { correlationIdMiddleware } from "./middleware/correlationId.js";
+import { errorHandler } from "./middleware/errorHandler.js";
+
 import sessionRoutes from "./routes/session.js";
 import filesRoutes from "./routes/files.js";
 import backupsRoutes from "./routes/backups.js";
+import restoresRoutes from "./routes/restores.js";
 import dashboardRoutes from "./routes/dashboard.js";
+import reportsRoutes from "./routes/reports.js";
+import integrityRoutes from "./routes/integrity.js";
+import { mockTeamA } from "./mocks/teamMocks.js";
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
-// --- Team D's own BFF endpoints ---
-// These proxy/aggregate calls to Team C (and Team A/B via Team C).
-// For now they return mock data so you can build the UI without waiting
-// on the other teams.
-app.use("/api/v1/ui/session", sessionRoutes);
-app.use("/api/v1/ui/files", filesRoutes);
-app.use("/api/v1/ui/backups", backupsRoutes);
-app.use("/api/v1/ui/dashboard", dashboardRoutes);
+// Section 3.1: X-Correlation-ID injection across all incoming requests
+app.use(correlationIdMiddleware);
+
+// --- Section 4.4 (D1–D4) Endpoints ---
+app.use("/api/v1/ui/session", sessionRoutes);      // D1 Auth
+app.use("/api/v1/ui/files", filesRoutes);          // D2 Browse & D4 Admin edit
+app.use("/api/v1/ui/backups", backupsRoutes);      // D2 Schedule & Status lookup
+app.use("/api/v1/ui/restores", restoresRoutes);    // D2 Version restore
+app.use("/api/v1/ui/dashboard", dashboardRoutes);  // D3 Live dashboard summary
+app.use("/api/v1/ui/reports", reportsRoutes);      // D4 Storage reports
+app.use("/api/v1/ui/integrity", integrityRoutes);  // D3 Integrity & D4 verify preview
 
 app.get("/api/v1/ui/me", (req, res) => {
-  res.json({ data: { username: "demo.user", role: "Employee" }, meta: {} });
+  const userRole = req.headers["x-user-role"] || "IT Admin";
+  res.json({
+    data: { username: "admin_tejashree", role: userRole, institution_id: "RIT-CSE-2026" },
+    meta: { correlation_id: req.correlationId, api_version: "v1" }
+  });
 });
+
+// Standard Error Envelope Middleware
+app.use(errorHandler);
 
 const httpServer = createServer(app);
 
-// --- Live dashboard stream (Section D3 in the doc) ---
+// --- D3. Live Operations Streaming Relay ---
 const io = new Server(httpServer, {
-  cors: { origin: "*" },
+  cors: { origin: "*" }
 });
 
 io.on("connection", (socket) => {
-  console.log("Dashboard client connected:", socket.id);
+  console.log(`[D3 Stream] Dashboard client connected: ${socket.id}`);
 
-  // Demo: push a fake state update every 4s so you can see the
-  // live-update UI working before Team A/B/C are wired up for real.
+  // Broadcast live updates every 3 seconds matching D3 requirements
   const interval = setInterval(() => {
+    const correlationId = "corr-stream-" + Math.floor(1000 + Math.random() * 9000);
+
     socket.emit("dashboard_update", {
       timestamp: new Date().toISOString(),
-      queueDepth: Math.floor(Math.random() * 10),
+      correlation_id: correlationId,
+      queueDepth: mockTeamA.queueDepth,
+      dedupSavingsRatioPct: 73.5,
+      merkleStatus: "100% HEALTHY",
+      activeWorkersCount: 3,
+      workers: mockTeamA.workers,
+      schedulingPolicy: mockTeamA.schedulingPolicy,
       lastBackupState: "COMMITTED",
+      serverNode: {
+        host: "ApniLeap-Central-Node-01 (On-Premise Host)",
+        ip: "10.0.4.82",
+        status: "ONLINE",
+        port: 4000
+      }
     });
-  }, 4000);
+  }, 3000);
 
   socket.on("disconnect", () => {
     clearInterval(interval);
-    console.log("Dashboard client disconnected:", socket.id);
+    console.log(`[D3 Stream] Client disconnected: ${socket.id}`);
   });
 });
 
 const PORT = process.env.PORT || 4000;
 httpServer.listen(PORT, () => {
-  console.log(`Team D backend (BFF) running on http://localhost:${PORT}`);
+  console.log(`Team D Backend-For-Frontend (BFF) running on http://localhost:${PORT}`);
+  console.log(`OpenAPI v1 Endpoints (D1-D4) exposed at http://localhost:${PORT}/api/v1/ui/*`);
 });
