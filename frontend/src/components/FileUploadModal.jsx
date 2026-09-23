@@ -5,6 +5,7 @@ export default function FileUploadModal({ isOpen, onClose, onUpload }) {
   const [fileSize, setFileSize] = useState("4.5 MB");
   const [storageClass, setStorageClass] = useState("STANDARD");
   const [retentionDays, setRetentionDays] = useState(30);
+  const [fileObj, setFileObj] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -16,6 +17,7 @@ export default function FileUploadModal({ isOpen, onClose, onUpload }) {
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
+      setFileObj(file);
       setFileName(file.name);
       setFileSize((file.size / (1024 * 1024)).toFixed(1) + " MB");
     }
@@ -24,9 +26,19 @@ export default function FileUploadModal({ isOpen, onClose, onUpload }) {
   const handleFileSelect = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      setFileObj(file);
       setFileName(file.name);
       setFileSize((file.size / (1024 * 1024)).toFixed(1) + " MB");
     }
+  };
+
+  const readFileAsBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -48,9 +60,18 @@ export default function FileUploadModal({ isOpen, onClose, onUpload }) {
     }, 150);
 
     try {
-      await new Promise((res) => setTimeout(res, 800));
+      let contentBase64 = null;
+      if (fileObj) {
+        try {
+          contentBase64 = await readFileAsBase64(fileObj);
+        } catch (readErr) {
+          console.warn("Could not read file binary, continuing with metadata:", readErr.message);
+        }
+      }
+
+      await new Promise((res) => setTimeout(res, 400));
       setUploadProgress(100);
-      await onUpload(fileName, fileSize, storageClass, retentionDays);
+      await onUpload(fileName, fileSize, storageClass, retentionDays, contentBase64);
       onClose();
     } finally {
       clearInterval(interval);
@@ -58,6 +79,7 @@ export default function FileUploadModal({ isOpen, onClose, onUpload }) {
       setUploadProgress(0);
     }
   };
+
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fadeIn">

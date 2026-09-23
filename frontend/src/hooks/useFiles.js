@@ -31,7 +31,7 @@ export function useFiles() {
     fetchFiles();
   }, [fetchFiles]);
 
-  const uploadFile = async (name, size, storageClass, retentionDays) => {
+  const uploadFile = async (name, size, storageClass, retentionDays, content = null) => {
     setUploading(true);
     setError(null);
     try {
@@ -39,7 +39,8 @@ export function useFiles() {
         name,
         size: size || "3.2 MB",
         storage_class: storageClass || "STANDARD",
-        retention_days: retentionDays || 30
+        retention_days: retentionDays || 30,
+        content
       });
       await fetchFiles();
       return res.data.data;
@@ -53,11 +54,13 @@ export function useFiles() {
         folder: "uploads",
         owner: localStorage.getItem("apnileap_user")
           ? JSON.parse(localStorage.getItem("apnileap_user")).username
-          : "emp_rahul"
+          : "emp_rahul",
+        content
       });
       setFiles(getLocalFiles());
       return newFile;
     } finally {
+
       setUploading(false);
     }
   };

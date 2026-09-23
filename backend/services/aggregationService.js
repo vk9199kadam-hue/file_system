@@ -126,8 +126,8 @@ export const aggregationService = {
     return list;
   },
 
-  addNewUploadedFile({ fileName, size, folder, owner, storageClass = "HOT_STORAGE", retentionDays = 90 }) {
-    const fileId = "f" + (mockTeamC.files.length + 1);
+  addNewUploadedFile({ fileName, size, folder, owner, storageClass = "HOT_STORAGE", retentionDays = 90, storagePath = null, checksum = null }) {
+    const fileId = "f" + (Date.now() % 10000);
     const newFile = {
       file_id: fileId,
       name: fileName,
@@ -136,13 +136,15 @@ export const aggregationService = {
       folder: folder || "documents",
       retention_days: Number(retentionDays) || 90,
       storage_class: storageClass,
-      checksum: "sha256-" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+      checksum: checksum || ("sha256-" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)),
       owner: owner || "emp_rahul",
+      storage_path: storagePath,
       last_backup_at: new Date().toISOString()
     };
     mockTeamC.addFile(newFile);
     return newFile;
   },
+
 
   getFileVersions(fileId) {
     const file = mockTeamC.getFileById(fileId);

@@ -147,69 +147,107 @@ export const PREDEFINED_USERS = [
   }
 ];
 
-export const mockTeamC = {
-  files: [
-    {
-      file_id: "f1",
-      name: "apnileap_financial_ledger_2026.pdf",
-      lastVersion: "v4",
-      size: "4.2 MB",
-      folder: "finance",
-      retention_days: 90,
-      storage_class: "HOT_STORAGE",
-      checksum: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      owner: "emp_sneha",
-      last_backup_at: "2026-09-22T14:30:00Z"
-    },
-    {
-      file_id: "f2",
-      name: "smart_campus_system_architecture.drawio",
-      lastVersion: "v2",
-      size: "2.4 MB",
-      folder: "engineering",
-      retention_days: 60,
-      storage_class: "STANDARD",
-      checksum: "f7a938c201a3598b9f0d14b10b0e9324d52183e878e1d2b292e49c719842a8b9",
-      owner: "emp_rahul",
-      last_backup_at: "2026-09-22T16:15:00Z"
-    },
-    {
-      file_id: "f3",
-      name: "apnileap_production_db_dump.sql",
-      lastVersion: "v12",
-      size: "148.5 MB",
-      folder: "database",
-      retention_days: 365,
-      storage_class: "COLD_STORAGE",
-      checksum: "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
-      owner: "admin_tejashree",
-      last_backup_at: "2026-09-22T10:00:00Z"
-    },
-    {
-      file_id: "f4",
-      name: "ai_model_training_dataset.parquet",
-      lastVersion: "v3",
-      size: "84.1 MB",
-      folder: "research",
-      retention_days: 180,
-      storage_class: "STANDARD",
-      checksum: "8a6b2c4d1e3f5a7b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b",
-      owner: "emp_priya",
-      last_backup_at: "2026-09-22T17:45:00Z"
-    },
-    {
-      file_id: "f5",
-      name: "iso27001_audit_compliance_pack.zip",
-      lastVersion: "v1",
-      size: "19.8 MB",
-      folder: "compliance",
-      retention_days: 730,
-      storage_class: "COLD_STORAGE",
-      checksum: "5c8f2b1a9e3d7c5b1a9e3d7c5b1a9e3d7c5b1a9e3d7c5b1a9e3d7c5b1a9e3d7c",
-      owner: "audit_meera",
-      last_backup_at: "2026-09-22T18:20:00Z"
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const DATA_DIR = path.resolve(__dirname, "../data");
+const UPLOADS_DIR = path.resolve(DATA_DIR, "uploads");
+const FILES_JSON_PATH = path.resolve(DATA_DIR, "files.json");
+
+// Ensure data directories exist
+if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+
+export const INITIAL_FILES = [
+  {
+    file_id: "f1",
+    name: "apnileap_financial_ledger_2026.pdf",
+    lastVersion: "v4",
+    size: "4.2 MB",
+    folder: "finance",
+    retention_days: 90,
+    storage_class: "HOT_STORAGE",
+    checksum: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    owner: "emp_sneha",
+    last_backup_at: "2026-09-22T14:30:00Z"
+  },
+  {
+    file_id: "f2",
+    name: "smart_campus_system_architecture.drawio",
+    lastVersion: "v2",
+    size: "2.4 MB",
+    folder: "engineering",
+    retention_days: 60,
+    storage_class: "STANDARD",
+    checksum: "f7a938c201a3598b9f0d14b10b0e9324d52183e878e1d2b292e49c719842a8b9",
+    owner: "emp_rahul",
+    last_backup_at: "2026-09-22T16:15:00Z"
+  },
+  {
+    file_id: "f3",
+    name: "apnileap_production_db_dump.sql",
+    lastVersion: "v12",
+    size: "148.5 MB",
+    folder: "database",
+    retention_days: 365,
+    storage_class: "COLD_STORAGE",
+    checksum: "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+    owner: "admin_tejashree",
+    last_backup_at: "2026-09-22T10:00:00Z"
+  },
+  {
+    file_id: "f4",
+    name: "ai_model_training_dataset.parquet",
+    lastVersion: "v3",
+    size: "84.1 MB",
+    folder: "research",
+    retention_days: 180,
+    storage_class: "STANDARD",
+    checksum: "8a6b2c4d1e3f5a7b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b",
+    owner: "emp_priya",
+    last_backup_at: "2026-09-22T17:45:00Z"
+  },
+  {
+    file_id: "f5",
+    name: "iso27001_audit_compliance_pack.zip",
+    lastVersion: "v1",
+    size: "19.8 MB",
+    folder: "compliance",
+    retention_days: 730,
+    storage_class: "COLD_STORAGE",
+    checksum: "5c8f2b1a9e3d7c5b1a9e3d7c5b1a9e3d7c5b1a9e3d7c5b1a9e3d7c5b1a9e3d7c",
+    owner: "audit_meera",
+    last_backup_at: "2026-09-22T18:20:00Z"
+  }
+];
+
+function loadPersistedFiles() {
+  try {
+    if (fs.existsSync(FILES_JSON_PATH)) {
+      const data = fs.readFileSync(FILES_JSON_PATH, "utf-8");
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     }
-  ],
+  } catch (err) {
+    console.error("Failed to read persisted files.json:", err.message);
+  }
+  savePersistedFiles(INITIAL_FILES);
+  return [...INITIAL_FILES];
+}
+
+function savePersistedFiles(files) {
+  try {
+    fs.writeFileSync(FILES_JSON_PATH, JSON.stringify(files, null, 2), "utf-8");
+  } catch (err) {
+    console.error("Failed to save files.json:", err.message);
+  }
+}
+
+export const mockTeamC = {
+  files: loadPersistedFiles(),
 
   getFileById(fileId) {
     return this.files.find(f => f.file_id === fileId);
@@ -217,6 +255,7 @@ export const mockTeamC = {
 
   addFile(fileData) {
     this.files.unshift(fileData);
+    savePersistedFiles(this.files);
     return fileData;
   },
 
@@ -225,11 +264,13 @@ export const mockTeamC = {
     if (file) {
       if (retentionDays !== undefined) file.retention_days = Number(retentionDays);
       if (storageClass) file.storage_class = storageClass;
+      savePersistedFiles(this.files);
       return file;
     }
     return null;
   }
 };
+
 
 let workerRoundRobinCounter = 0;
 

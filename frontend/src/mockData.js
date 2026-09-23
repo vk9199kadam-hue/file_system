@@ -4,6 +4,53 @@
  * offline demo mode, or when connecting to remote BFF server.
  */
 
+export function createValidPdfBlob(title, lines) {
+  const cleanTitle = (title || "ApniLeap Backup Document").replace(/[\(\)\\]/g, "");
+  const contentStream =
+    "BT\n" +
+    "/F1 16 Tf\n" +
+    "50 750 Td\n" +
+    `(${cleanTitle}) Tj\n` +
+    "/F1 10 Tf\n" +
+    "0 -22 Td\n" +
+    lines.map(line => `(${line.replace(/[\(\)\\]/g, "")}) '`).join("\n") + "\n" +
+    "ET";
+
+  const encoder = new TextEncoder();
+  const streamBytes = encoder.encode(contentStream);
+  const streamLength = streamBytes.length;
+
+  const objects = [
+    `%PDF-1.4\n%\xE2\xE3\xCF\xD3\n`,
+    `1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n`,
+    `2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n`,
+    `3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n`,
+    `4 0 obj\n<< /Length ${streamLength} >>\nstream\n${contentStream}\nendstream\nendobj\n`,
+    `5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n`
+  ];
+
+  let offset = 0;
+  const offsets = [];
+  let pdf = objects[0];
+  offset = encoder.encode(pdf).length;
+
+  for (let i = 1; i < objects.length; i++) {
+    offsets.push(offset);
+    pdf += objects[i];
+    offset += encoder.encode(objects[i]).length;
+  }
+
+  const xrefOffset = offset;
+  let xref = `xref\n0 6\n0000000000 65535 f \n`;
+  for (const off of offsets) {
+    xref += String(off).padStart(10, "0") + " 00000 n \n";
+  }
+
+  const trailer = `trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`;
+  return new Blob([encoder.encode(pdf + xref + trailer)], { type: "application/pdf" });
+}
+
+
 export const INITIAL_FILES = [
   {
     file_id: "f1",
