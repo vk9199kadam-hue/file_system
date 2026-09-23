@@ -6,9 +6,17 @@ import App from "./App.jsx";
 import "./index.css";
 
 // Connect to local backend if running locally, or the active Cloudflare Tunnel if running on Vercel/cloud
-const DEFAULT_TUNNEL_URL = "https://purposes-perfect-symphony-volvo.trycloudflare.com";
+const CURRENT_ACTIVE_TUNNEL = "https://purposes-perfect-symphony-volvo.trycloudflare.com";
+
+let targetApiUrl = import.meta.env.VITE_API_URL;
+if (!targetApiUrl || targetApiUrl.includes("about-london-stake-medium") || targetApiUrl.includes("smart-lights-tap")) {
+  targetApiUrl = CURRENT_ACTIVE_TUNNEL;
+}
+
 const isLocal = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || (isLocal ? "http://localhost:4000" : DEFAULT_TUNNEL_URL);
+axios.defaults.baseURL = isLocal ? "http://localhost:4000" : targetApiUrl;
+console.log("[ApniLeap] Connected to BFF at:", axios.defaults.baseURL);
+
 
 
 

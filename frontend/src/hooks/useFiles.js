@@ -15,14 +15,15 @@ export function useFiles() {
       const res = await axios.get("/api/v1/ui/files");
       if (res.data?.data && Array.isArray(res.data.data)) {
         setFiles(res.data.data);
+        saveLocalFiles(res.data.data);
       } else {
         setFiles(getLocalFiles());
       }
     } catch (err) {
       console.warn("BFF server unreachable or network error; loading local file cache:", err.message);
-      // Graceful offline fallback: Never block user with error banner
       setFiles(getLocalFiles());
     } finally {
+
       setLoading(false);
     }
   }, []);
