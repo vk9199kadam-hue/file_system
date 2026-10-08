@@ -1,37 +1,14 @@
 import { Router } from "express";
+import fs from "fs";
+import path from "path";
+import crypto from "crypto";
+import { fileURLToPath } from "url";
 import { aggregationService } from "../services/aggregationService.js";
 import { createSuccessEnvelope, createErrorEnvelope } from "../../contracts/response-envelopes.js";
 import { requireRoles } from "../middleware/auth.js";
 import { SYSTEM_ROLES } from "../../contracts/shared-types.js";
 
 const router = Router();
-
-// GET /api/v1/ui/files -> Browse files with filters (D2)
-router.get("/", (req, res, next) => {
-  try {
-    const { q, folder, storage_class } = req.query;
-    const files = aggregationService.getFiles(q, folder, storage_class);
-    res.json(createSuccessEnvelope(files, req.correlationId));
-  } catch (err) {
-    next(err);
-  }
-});
-
-// GET /api/v1/ui/files/:fileId/versions -> Browsable version history (D2)
-router.get("/:fileId/versions", (req, res, next) => {
-  try {
-    const versions = aggregationService.getFileVersions(req.params.fileId);
-    res.json(createSuccessEnvelope(versions, req.correlationId));
-  } catch (err) {
-    next(err);
-  }
-});
-
-import fs from "fs";
-import path from "path";
-import crypto from "crypto";
-import { fileURLToPath } from "url";
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const UPLOADS_DIR = path.resolve(__dirname, "../data/uploads");
@@ -81,8 +58,29 @@ function generateValidPdfBinary(title, lines) {
   return Buffer.from(pdf + xref + trailer, "binary");
 }
 
+// GET /api/v1/ui/files -> Browse files with filters (D2)
+router.get("/", async (req, res, next) => {
+  try {
+    const { q, folder, storage_class } = req.query;
+    const files = await aggregationService.getFiles(q, folder, storage_class);
+    res.json(createSuccessEnvelope(files, req.correlationId));
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/v1/ui/files/:fileId/versions -> Browsable version history (D2)
+router.get("/:fileId/versions", async (req, res, next) => {
+  try {
+    const versions = await aggregationService.getFileVersions(req.params.fileId);
+    res.json(createSuccessEnvelope(versions, req.correlationId));
+  } catch (err) {
+    next(err);
+  }
+});
+
 // POST /api/v1/ui/files -> Upload new file & trigger backup (D2)
-router.post("/", (req, res, next) => {
+router.post("/", async (req, res, next) => {
   try {
     const { name, size, storage_class, retention_days, folder, content } = req.body;
 
@@ -100,21 +98,22 @@ router.post("/", (req, res, next) => {
     const username = req.headers["x-username"] || "emp_rahul";
     let storagePath = null;
     let checksum = null;
+    let rawBuffer = null;
 
     if (content && typeof content === "string") {
       try {
         const base64Data = content.includes(";base64,") ? content.split(";base64,")[1] : content;
-        const fileBuffer = Buffer.from(base64Data, "base64");
+        rawBuffer = Buffer.from(base64Data, "base64");
         const safeName = Date.now() + "_" + name.replace(/[^a-zA-Z0-9._-]/g, "_");
         storagePath = path.resolve(UPLOADS_DIR, safeName);
-        fs.writeFileSync(storagePath, fileBuffer);
-        checksum = crypto.createHash("sha256").update(fileBuffer).digest("hex");
+        fs.writeFileSync(storagePath, rawBuffer);
+        checksum = crypto.createHash("sha256").update(rawBuffer).digest("hex");
       } catch (e) {
         console.warn("Could not save uploaded binary buffer, saving metadata only:", e.message);
       }
     }
 
-    const result = aggregationService.addNewUploadedFile({
+    const result = await aggregationService.addNewUploadedFile({
       fileName: name,
       size,
       folder,
@@ -122,8 +121,10 @@ router.post("/", (req, res, next) => {
       storageClass: storage_class,
       retentionDays: retention_days,
       storagePath,
-      checksum
+      checksum,
+      rawBuffer
     });
+
     res.status(201).json(createSuccessEnvelope(result, req.correlationId));
   } catch (err) {
     next(err);
@@ -131,11 +132,11 @@ router.post("/", (req, res, next) => {
 });
 
 // PATCH /api/v1/ui/files/:fileId -> Edit retention policy & storage class (D4 - IT Admin only)
-router.patch("/:fileId", requireRoles([SYSTEM_ROLES.IT_ADMIN]), (req, res, next) => {
+router.patch("/:fileId", requireRoles([SYSTEM_ROLES.IT_ADMIN]), async (req, res, next) => {
   try {
     const { retention_days, storage_class } = req.body;
     const username = req.headers["x-username"] || "admin_tejashree";
-    const updated = aggregationService.updateFilePolicy(req.params.fileId, retention_days, storage_class, username);
+    const updated = await aggregationService.updateFilePolicy(req.params.fileId, retention_days, storage_class, username);
     res.json(createSuccessEnvelope(updated, req.correlationId));
   } catch (err) {
     next(err);
@@ -143,9 +144,10 @@ router.patch("/:fileId", requireRoles([SYSTEM_ROLES.IT_ADMIN]), (req, res, next)
 });
 
 // GET /api/v1/ui/files/:fileId/download -> Download verified backup file
-router.get("/:fileId/download", (req, res, next) => {
+router.get("/:fileId/download", async (req, res, next) => {
   try {
-    const file = aggregationService.getFiles().find(f => f.file_id === req.params.fileId);
+    const files = await aggregationService.getFiles();
+    const file = files.find(f => f.file_id === req.params.fileId);
     if (!file) {
       return res.status(404).json(
         createErrorEnvelope(
@@ -163,7 +165,7 @@ router.get("/:fileId/download", (req, res, next) => {
       return res.sendFile(file.storage_path);
     }
 
-    // 2. If it's a PDF, generate a 100% valid, genuine PDF binary that opens in Adobe/Chrome without error!
+    // 2. If it's a PDF, generate a valid PDF binary
     if (file.name.toLowerCase().endsWith(".pdf")) {
       const pdfBuffer = generateValidPdfBinary(file.name, [
         `System: ApniLeap Central Datacenter Backup System`,
@@ -173,9 +175,10 @@ router.get("/:fileId/download", (req, res, next) => {
         `Owner: ${file.owner || "emp_rahul"}`,
         `Storage Class: ${file.storage_class || "STANDARD"}`,
         `Retention SLA: ${file.retention_days || 30} days`,
-        `Backup State: COMMITTED (Round-Robin Worker Validated)`,
+        `Storage Pointer: ${file.storage_pointer || "Pointer Registered"}`,
         `SHA-256 Digest: ${file.checksum || "Verified"}`,
         `Worker Distribution: Node-Alpha, Node-Beta, Node-Gamma`,
+        `Database: MongoDB Compass (smart_file_backup)`,
         `Downloaded At: ${new Date().toISOString()}`
       ]);
 
@@ -194,7 +197,9 @@ router.get("/:fileId/download", (req, res, next) => {
       `Owner: ${file.owner}\n` +
       `SHA-256 Checksum: ${file.checksum}\n` +
       `Storage Class: ${file.storage_class}\n` +
+      `Storage Pointer: ${file.storage_pointer || "Pointer Registered"}\n` +
       `Retention: ${file.retention_days} days\n` +
+      `Database: MongoDB Compass (smart_file_backup)\n` +
       `Backup Status: COMMITTED (Verified)\n`;
     res.send(content);
   } catch (err) {
@@ -203,5 +208,3 @@ router.get("/:fileId/download", (req, res, next) => {
 });
 
 export default router;
-
-

@@ -1,0 +1,21 @@
+APNILEAP ENTERPRISE BACKUP SYSTEM - TEST SUITE V2 (REVISED)
+==================================================
+Project: Smart Campus File Backup Architecture (RIT-CSE 2026)
+Document ID: DOC-2026-ENG-001-REV-2
+Classification: RESTRICTED / INTERNAL USE ONLY
+
+SECTION 1: SYSTEM SPECIFICATION
+The ApniLeap platform orchestrates distributed file backups across three horizontal OS worker nodes:
+Node-Alpha, Node-Beta, and Node-Gamma. File ingestion is managed by an intelligent content-defined
+chunking pipeline coupled with cryptographic SHA-256 fingerprinting.
+
+SECTION 2: MODIFIED REVISION (DELTA BLOCK)
+[UPDATED CONTENT IN REVISION 2]: The load balancing engine has been upgraded to Dynamic Weighted
+Capacity (DWC) to automatically distribute chunk tasks based on real-time CPU capacity scores.
+This sentence represents a new unique cryptographic block while retaining previous unchanged blocks.
+
+SECTION 3: AUDIT COMPLIANCE & RECOVERY
+Every backup commit computes a Merkle Tree Root Hash, guaranteeing that any bit-level tampering
+or block degradation will be caught immediately during compliance scans.
+==================================================
+END OF TEST SPECIFICATION V2

@@ -5,7 +5,7 @@ import { createSuccessEnvelope, createErrorEnvelope } from "../../contracts/resp
 const router = Router();
 
 // POST /api/v1/ui/restores -> Request point-in-time version restore (D2)
-router.post("/", (req, res, next) => {
+router.post("/", async (req, res, next) => {
   try {
     const { file_id, version_id, target_path } = req.body;
     const idempotencyKey = req.headers["idempotency-key"];
@@ -22,7 +22,7 @@ router.post("/", (req, res, next) => {
       );
     }
 
-    const restoreResult = aggregationService.orchestrateRestore({
+    const restoreResult = await aggregationService.orchestrateRestore({
       fileId: file_id,
       versionId: version_id,
       targetPath: target_path,

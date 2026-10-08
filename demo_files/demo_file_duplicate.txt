@@ -1,0 +1,21 @@
+APNILEAP ENTERPRISE BACKUP SYSTEM - TEST SUITE V1
+==================================================
+Project: Smart Campus File Backup Architecture (RIT-CSE 2026)
+Document ID: DOC-2026-ENG-001
+Classification: RESTRICTED / INTERNAL USE ONLY
+
+SECTION 1: SYSTEM SPECIFICATION
+The ApniLeap platform orchestrates distributed file backups across three horizontal OS worker nodes:
+Node-Alpha, Node-Beta, and Node-Gamma. File ingestion is managed by an intelligent content-defined
+chunking pipeline coupled with cryptographic SHA-256 fingerprinting.
+
+SECTION 2: DEDUPLICATION OBJECTIVES
+By partitioning incoming data streams into cryptographic blocks, the storage subsystem minimizes
+redundant block allocation. Chunk pointer manifests are persisted inside MongoDB Compass ('smart_file_backup'),
+while physical storage bytes are retained in localized chunk repositories.
+
+SECTION 3: AUDIT COMPLIANCE & RECOVERY
+Every backup commit computes a Merkle Tree Root Hash, guaranteeing that any bit-level tampering
+or block degradation will be caught immediately during compliance scans.
+==================================================
+END OF TEST SPECIFICATION V1

@@ -1,5 +1,44 @@
 [
   {
+    "file_id": "f5755",
+    "name": "ME2pgG0bjf.png",
+    "lastVersion": "v1",
+    "size": "2.1 MB",
+    "folder": "documents",
+    "retention_days": 30,
+    "storage_class": "STANDARD",
+    "checksum": "a4c8cb67355c270916a6c3ca48c3530e0ebbfbda9d65c447fd728bb7a9298f0a",
+    "owner": "emp_rahul",
+    "storage_path": "/Users/apple/Desktop/smart_file_mp/backend/data/uploads/1791456055749_ME2pgG0bjf.png",
+    "last_backup_at": "2026-10-08T10:40:55.755Z"
+  },
+  {
+    "file_id": "f2187",
+    "name": "SIH26188_VISIONX.pdf",
+    "lastVersion": "v1",
+    "size": "3.1 MB",
+    "folder": "documents",
+    "retention_days": 30,
+    "storage_class": "STANDARD",
+    "checksum": "sha256-5xz7qn6y1bwfrvehr5tcin",
+    "owner": "emp_priya",
+    "storage_path": null,
+    "last_backup_at": "2026-10-07T09:08:12.187Z"
+  },
+  {
+    "file_id": "f2097",
+    "name": "SIH26188_VISIONX.pdf",
+    "lastVersion": "v1",
+    "size": "3.1 MB",
+    "folder": "documents",
+    "retention_days": 30,
+    "storage_class": "STANDARD",
+    "checksum": "sha256-ie4jom5sdkod3h4hfq90n9",
+    "owner": "emp_priya",
+    "storage_path": null,
+    "last_backup_at": "2026-10-07T09:07:32.097Z"
+  },
+  {
     "file_id": "f1113",
     "name": "1_Linux.pdf",
     "lastVersion": "v1",
@@ -42,8 +81,8 @@
     "lastVersion": "v12",
     "size": "148.5 MB",
     "folder": "database",
-    "retention_days": 365,
-    "storage_class": "COLD_STORAGE",
+    "retention_days": 90,
+    "storage_class": "HOT_STORAGE",
     "checksum": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
     "owner": "admin_tejashree",
     "last_backup_at": "2026-09-22T10:00:00Z"
