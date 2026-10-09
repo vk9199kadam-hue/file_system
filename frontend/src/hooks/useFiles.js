@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { getLocalFiles, addLocalFile, updateLocalFile } from "../mockData";
+import { getLocalFiles, saveLocalFiles, addLocalFile, updateLocalFile } from "../mockData";
 
 export function useFiles() {
   const [files, setFiles] = useState(() => getLocalFiles());
@@ -15,7 +15,11 @@ export function useFiles() {
       const res = await axios.get("/api/v1/ui/files");
       if (res.data?.data && Array.isArray(res.data.data)) {
         setFiles(res.data.data);
-        saveLocalFiles(res.data.data);
+        try {
+          saveLocalFiles(res.data.data);
+        } catch (storageErr) {
+          console.warn("Could not cache files to localStorage:", storageErr.message);
+        }
       } else {
         setFiles(getLocalFiles());
       }
@@ -23,7 +27,6 @@ export function useFiles() {
       console.warn("BFF server unreachable or network error; loading local file cache:", err.message);
       setFiles(getLocalFiles());
     } finally {
-
       setLoading(false);
     }
   }, []);
@@ -61,7 +64,6 @@ export function useFiles() {
       setFiles(getLocalFiles());
       return newFile;
     } finally {
-
       setUploading(false);
     }
   };
@@ -87,4 +89,3 @@ export function useFiles() {
 
   return { files, loading, uploading, error, refresh: fetchFiles, uploadFile, updatePolicy };
 }
-
