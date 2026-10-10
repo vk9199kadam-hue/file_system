@@ -19,13 +19,18 @@ function Protected({ children, allowedRoles }) {
   return children;
 }
 
+import { ThemeProvider, useTheme } from "./ThemeContext.jsx";
+
 function Layout({ children }) {
+  const { isDark } = useTheme();
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900 antialiased">
+    <div className={`min-h-screen flex flex-col font-sans antialiased transition-colors duration-200 ${
+      isDark ? "bg-[#070b14] text-slate-100" : "bg-slate-50 text-slate-900"
+    }`}>
       <Navbar />
       <div className="flex flex-1">
         <Sidebar />
-        <main className="flex-1 overflow-x-hidden">{children}</main>
+        <main className={`flex-1 overflow-x-hidden ${isDark ? "bg-[#070b14]" : "bg-slate-50"}`}>{children}</main>
       </div>
     </div>
   );
@@ -92,8 +97,10 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppRoutes />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

@@ -102,7 +102,6 @@ export default function Files() {
     }
   };
 
-
   const handleTriggerBackup = async (file) => {
     try {
       const result = await startBackup(file.file_id, "ROUND_ROBIN", 3);
@@ -130,34 +129,36 @@ export default function Files() {
     }
   };
 
-
   const filteredFiles = files.filter((file) => {
-    const matchesSearch = file.name.toLowerCase().includes(searchQuery.toLowerCase()) || file.file_id.toLowerCase().includes(searchQuery.toLowerCase()) || (file.owner && file.owner.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesSearch =
+      file.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      file.file_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (file.owner && file.owner.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesFolder = folderFilter === "ALL" || (file.folder || "documents").toLowerCase() === folderFilter.toLowerCase();
     const matchesClass = storageClassFilter === "ALL" || (file.storage_class || "STANDARD") === storageClassFilter;
     return matchesSearch && matchesFolder && matchesClass;
   });
 
-  if (loading) return <div className="p-8 text-slate-500 text-center">Loading files from ApniLeap Central Datacenter...</div>;
-  if (error) return <div className="p-6 text-rose-600 bg-rose-50 border border-rose-200 rounded-xl">{error}</div>;
+  if (loading) return <div className="p-12 text-slate-500 dark:text-slate-400 text-center font-medium">Loading files from ApniLeap Central Datacenter...</div>;
+  if (error) return <div className="p-6 text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-2xl">{error}</div>;
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto transition-colors duration-200">
       {/* Remote VPN Security Notice */}
       {isRemoteBlocked && (
-        <div className="bg-rose-950 border border-rose-500/40 text-rose-200 p-5 rounded-2xl shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="bg-rose-900/90 dark:bg-rose-950/90 border border-rose-500/40 text-rose-100 p-5 rounded-2xl shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center space-x-3.5">
             <span className="text-3xl">⛔</span>
             <div>
               <p className="font-bold text-sm text-white">External Access Blocked: Corporate Server Protected</p>
-              <p className="text-xs text-rose-300 mt-0.5">
+              <p className="text-xs text-rose-200 mt-0.5">
                 You are outside the campus network. The On-Premise ApniLeap central storage is blocked behind firewall.
               </p>
             </div>
           </div>
           <button
             onClick={toggleVpn}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-lg transition-all flex items-center space-x-2 shrink-0"
+            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-lg transition-all flex items-center space-x-2 shrink-0 cursor-pointer"
           >
             <span>🔒 Connect ApniLeap Secure VPN Tunnel</span>
           </button>
@@ -167,13 +168,13 @@ export default function Files() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2.5">
             File Repository &amp; Version History
-            <span className="text-xs px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 font-mono border border-indigo-200">
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300 font-mono border border-blue-200 dark:border-blue-500/30 font-bold">
               Contract D2
             </span>
           </h1>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
             Browse files, inspect cryptographic revisions, and execute point-in-time restores
           </p>
         </div>
@@ -181,14 +182,14 @@ export default function Files() {
           <button
             onClick={() => setIsUploadModalOpen(true)}
             disabled={isRemoteBlocked}
-            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs px-4 py-2.5 rounded-xl font-medium shadow-md transition-all flex items-center space-x-1.5"
+            className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs px-4 py-2.5 rounded-xl font-bold shadow-md shadow-blue-600/20 transition-all flex items-center space-x-2 cursor-pointer"
           >
             <span>📤</span>
             <span>Upload File &amp; Backup</span>
           </button>
           <button
             onClick={refresh}
-            className="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-3 py-2.5 rounded-xl border font-medium transition-colors"
+            className="bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 font-bold transition-colors cursor-pointer"
           >
             🔄 Refresh
           </button>
@@ -196,18 +197,21 @@ export default function Files() {
       </div>
 
       {toastMessage && (
-        <div className="bg-indigo-50 border border-indigo-200 text-indigo-800 px-4 py-3 rounded-xl text-xs flex justify-between items-center shadow-sm">
+        <div className="bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-200 px-4 py-3 rounded-xl text-xs flex justify-between items-center shadow-sm">
           <span>{toastMessage}</span>
-          <button onClick={() => setToastMessage(null)} className="text-indigo-600 font-bold ml-4">✕</button>
+          <button onClick={() => setToastMessage(null)} className="text-blue-600 dark:text-blue-400 font-bold ml-4">✕</button>
         </div>
       )}
 
       {/* Search & Filters */}
-      <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col sm:flex-row items-center gap-3">
-        <div className="flex-1 w-full">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row items-center gap-3 transition-colors">
+        <div className="flex-1 w-full relative">
+          <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs">
+            🔍
+          </span>
           <input
             type="text"
-            className="w-full border border-slate-300 rounded-lg px-3.5 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+            className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl pl-9 pr-3.5 py-2 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors"
             placeholder="Search files by name, ID or owner..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -216,7 +220,7 @@ export default function Files() {
 
         <div className="flex items-center space-x-2 w-full sm:w-auto">
           <select
-            className="border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white focus:ring-2 focus:ring-indigo-500"
+            className="border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer"
             value={folderFilter}
             onChange={(e) => setFolderFilter(e.target.value)}
           >
@@ -229,7 +233,7 @@ export default function Files() {
           </select>
 
           <select
-            className="border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white focus:ring-2 focus:ring-indigo-500"
+            className="border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer"
             value={storageClassFilter}
             onChange={(e) => setStorageClassFilter(e.target.value)}
           >
@@ -242,93 +246,95 @@ export default function Files() {
       </div>
 
       {/* Files Table */}
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-        <table className="w-full text-left text-xs">
-          <thead className="bg-slate-50 text-slate-600 border-b border-slate-200 uppercase font-semibold">
-            <tr>
-              <th className="px-4 py-3">File Name &amp; Owner</th>
-              <th className="px-4 py-3">Latest Version</th>
-              <th className="px-4 py-3">Size</th>
-              <th className="px-4 py-3">Tier</th>
-              <th className="px-4 py-3">SHA-256 Fingerprint</th>
-              <th className="px-4 py-3">Backup State</th>
-              <th className="px-4 py-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {filteredFiles.map((file) => {
-              const status = backupStatus[file.file_id];
-              return (
-                <tr key={file.file_id} className="hover:bg-slate-50/80 transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-base">📄</span>
-                      <div>
-                        <p className="font-bold text-slate-800">{file.name}</p>
-                        <p className="text-[10px] text-slate-400 font-mono">Owner: {file.owner || "emp_rahul"}</p>
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm transition-colors">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800 uppercase font-bold tracking-wider">
+              <tr>
+                <th className="px-4 py-3.5">File Name &amp; Owner</th>
+                <th className="px-4 py-3.5">Latest Version</th>
+                <th className="px-4 py-3.5">Size</th>
+                <th className="px-4 py-3.5">Tier</th>
+                <th className="px-4 py-3.5">SHA-256 Fingerprint</th>
+                <th className="px-4 py-3.5">Backup State</th>
+                <th className="px-4 py-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {filteredFiles.map((file) => {
+                const status = backupStatus[file.file_id];
+                return (
+                  <tr key={file.file_id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                    <td className="px-4 py-3.5">
+                      <div className="flex items-center space-x-2.5">
+                        <span className="text-lg">📄</span>
+                        <div>
+                          <p className="font-bold text-slate-800 dark:text-slate-200">{file.name}</p>
+                          <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">Owner: {file.owner || "emp_rahul"}</p>
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 font-mono">
-                    <button
-                      onClick={() => setSelectedFileForDrawer(file)}
-                      className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs px-2.5 py-1 rounded-lg border border-indigo-200 font-bold transition-colors"
-                    >
-                      {file.lastVersion} (History)
-                    </button>
-                  </td>
-                  <td className="px-4 py-3 text-slate-600 font-mono">{file.size}</td>
-                  <td className="px-4 py-3">
-                    <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[10px] font-mono">
-                      {file.storage_class || "STANDARD"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 font-mono text-slate-500 text-[10px]">
-                    {file.checksum ? `${file.checksum.slice(0, 16)}...` : "sha256-verified"}
-                  </td>
-                  <td className="px-4 py-3">
-                    {status ? (
-                      <StateBadge state={status.state} />
-                    ) : (
-                      <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-[10px] font-bold border border-emerald-200">
-                        COMMITTED
+                    </td>
+                    <td className="px-4 py-3.5 font-mono">
+                      <button
+                        onClick={() => setSelectedFileForDrawer(file)}
+                        className="bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-xs px-2.5 py-1 rounded-lg border border-blue-200 dark:border-blue-800 font-bold transition-colors cursor-pointer"
+                      >
+                        {file.lastVersion} (History)
+                      </button>
+                    </td>
+                    <td className="px-4 py-3.5 text-slate-600 dark:text-slate-400 font-mono">{file.size}</td>
+                    <td className="px-4 py-3.5">
+                      <span className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded text-[10px] font-mono">
+                        {file.storage_class || "STANDARD"}
                       </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-right space-x-2">
-                    <button
-                      onClick={() => handleDownloadFile(file)}
-                      disabled={isRemoteBlocked}
-                      className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg font-medium shadow-xs inline-flex items-center space-x-1"
-                      title="Download file from central storage"
-                    >
-                      <span>📥</span>
-                      <span>Download</span>
-                    </button>
-                    <button
-                      onClick={() => handleTriggerBackup(file)}
-                      disabled={loadingFileId === file.file_id || isRemoteBlocked}
-                      className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg font-medium shadow-xs"
-                    >
-                      {loadingFileId === file.file_id ? "Scheduling..." : "Backup"}
-                    </button>
-                    <button
-                      onClick={() => {
-                        setSelectedFileForRestore(file);
-                        setSelectedVersionId(file.lastVersion);
-                        setTargetPath(`/restores/apnileap/${file.name}`);
-                      }}
-                      disabled={isRemoteBlocked}
-                      className="bg-slate-100 hover:bg-slate-200 disabled:opacity-50 text-slate-700 border px-3 py-1.5 rounded-lg font-medium"
-                    >
-                      Restore
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                    </td>
+                    <td className="px-4 py-3.5 font-mono text-slate-500 dark:text-slate-400 text-[10px]">
+                      {file.checksum ? `${file.checksum.slice(0, 16)}...` : "sha256-verified"}
+                    </td>
+                    <td className="px-4 py-3.5">
+                      {status ? (
+                        <StateBadge state={status.state} />
+                      ) : (
+                        <span className="bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded text-[10px] font-bold border border-emerald-200 dark:border-emerald-500/30">
+                          COMMITTED
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3.5 text-right space-x-2 whitespace-nowrap">
+                      <button
+                        onClick={() => handleDownloadFile(file)}
+                        disabled={isRemoteBlocked}
+                        className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg font-bold shadow-xs inline-flex items-center space-x-1 cursor-pointer transition-colors"
+                        title="Download file from central storage"
+                      >
+                        <span>📥</span>
+                        <span>Download</span>
+                      </button>
+                      <button
+                        onClick={() => handleTriggerBackup(file)}
+                        disabled={loadingFileId === file.file_id || isRemoteBlocked}
+                        className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-3 py-1.5 rounded-lg font-bold shadow-xs cursor-pointer transition-colors"
+                      >
+                        {loadingFileId === file.file_id ? "Scheduling..." : "Backup"}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setSelectedFileForRestore(file);
+                          setSelectedVersionId(file.lastVersion);
+                          setTargetPath(`/restores/apnileap/${file.name}`);
+                        }}
+                        disabled={isRemoteBlocked}
+                        className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-lg font-bold cursor-pointer transition-colors"
+                      >
+                        Restore
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Version Drawer */}
@@ -345,7 +351,6 @@ export default function Files() {
         }}
       />
 
-
       {/* File Upload Modal */}
       <FileUploadModal
         isOpen={isUploadModalOpen}
@@ -355,27 +360,27 @@ export default function Files() {
 
       {/* Restore Modal */}
       {selectedFileForRestore && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <h2 className="text-base font-bold text-slate-800">Restore Point-in-Time Version</h2>
-            <p className="text-xs text-slate-500">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4 transition-colors">
+            <h2 className="text-base font-bold text-slate-900 dark:text-white">Restore Point-in-Time Version</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Submit restore request with target directory path.
             </p>
 
             <form onSubmit={handleTriggerRestore} className="space-y-3">
               <div>
-                <label className="text-xs font-semibold text-slate-600">Selected File</label>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Selected File</label>
                 <input
                   readOnly
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-700 mt-1 font-mono"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-700 dark:text-slate-300 mt-1 font-mono"
                   value={selectedFileForRestore.name}
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-600">Version to Restore</label>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Version to Restore</label>
                 <select
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs bg-white mt-1 font-mono"
+                  className="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white mt-1 font-mono cursor-pointer"
                   value={selectedVersionId}
                   onChange={(e) => setSelectedVersionId(e.target.value)}
                 >
@@ -387,10 +392,10 @@ export default function Files() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-slate-600">Target Restore Destination Path</label>
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Target Restore Destination Path</label>
                 <input
                   required
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-xs mt-1 font-mono"
+                  className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white mt-1 font-mono focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   value={targetPath}
                   onChange={(e) => setTargetPath(e.target.value)}
                   placeholder="/restores/apnileap/file.pdf"
@@ -401,13 +406,13 @@ export default function Files() {
                 <button
                   type="button"
                   onClick={() => setSelectedFileForRestore(null)}
-                  className="px-4 py-2 border rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100"
+                  className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-xs font-medium hover:bg-indigo-700 shadow-md"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 shadow-md cursor-pointer"
                 >
                   Confirm Restore Request
                 </button>
