@@ -9,3 +9,4 @@ frontend/dist/
 backend/cloudflared
 backend/cloudflared.tgz
 backend/node_modules/.package-lock.json
+backend/data/uploads/chunks/

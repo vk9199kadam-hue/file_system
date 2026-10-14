@@ -68,6 +68,9 @@ smart_file_mp/
 │   └── demo_file_delta_v2.txt    # TEST 3: Delta revision (75% savings)
 ├── frontend/                     # React 18 SPA (Vite + Tailwind CSS) (Port 5173)
 ├── contracts/                    # Shared OpenAPI envelope schemas & types
+├── REPORT_VOL_1_ENGINE_DEVELOPMENT_CH5.md # Volume 1: Engine Development (Chapter 5 for all 4 Teams)
+├── REPORT_VOL_2_SYSTEM_PROJECT_REPORT.md  # Volume 2: Master System Project Report (Ch 1-4, 6-10)
+├── TEAM_BY_TEAM_DEFENSE_REPORT.md         # Team-by-Team Oral Defense & Rubric Mapping
 ├── DEMO_EVALUATION_GUIDE.md      # Step-by-step presentation script for the professor
 └── README.md
 ```
@@ -105,3 +108,14 @@ Open your browser at **[http://localhost:5173](http://localhost:5173)**.
 
 For complete step-by-step instructions to demonstrate to your professor/evaluator, refer to:  
 📄 **[DEMO_EVALUATION_GUIDE.md](file:///Users/apple/Desktop/smart_file_mp/DEMO_EVALUATION_GUIDE.md)**
+
+---
+
+## 📚 Academic Project Documentation & Reports (RIT CSE / MiniLeap)
+
+- 📘 **[Volume 1: Engine Development Report (Chapter 5 — All 4 Teams)](file:///Users/apple/Desktop/smart_file_mp/REPORT_VOL_1_ENGINE_DEVELOPMENT_CH5.md)**  
+  Comprehensive specification for Team A (OS Scheduler Engine), Team B (Deduplication & Integrity Engine), Team C (Metadata & Version Manager), and Team D (Control & Restore Dashboard). Covers S2 to S7 gates, architecture diagrams, APIs, algorithms, and validation.
+- 📕 **[Volume 2: Master System Project Report (Chapters 1–4, 6–10)](file:///Users/apple/Desktop/smart_file_mp/REPORT_VOL_2_SYSTEM_PROJECT_REPORT.md)**  
+  Full academic project report following the RIT autonomous format: Certificate, Declaration, Acknowledgement, Abstract, Literature Review, System Requirements, Deployment & Security, Results & Analysis, Conclusion, and Appendices.
+- 📋 **[Team-by-Team Oral Defense & Rubric Mapping Guide](file:///Users/apple/Desktop/smart_file_mp/TEAM_BY_TEAM_DEFENSE_REPORT.md)**  
+  Complete evaluation preparation document mapping every team member to viva defense questions, metrics, and codebase verification.
