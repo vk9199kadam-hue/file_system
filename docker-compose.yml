@@ -1,0 +1,64 @@
+# ==============================================================================
+# ApniLeap Enterprise Smart File Backup Platform
+# Docker Compose Orchestration File
+# ==============================================================================
+# Starts both the MongoDB database and the Smart File Platform container.
+#
+# Usage:
+#   docker compose up -d --build
+#
+# UI:      http://localhost:5173
+# Backend: http://localhost:4000
+# Mongo:   localhost:27017 (Connect via MongoDB Compass)
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # Service 1: MongoDB Database (for MongoDB Compass inspection)
+  # ----------------------------------------------------------------------------
+  mongodb:
+    image: mongo:7.0
+    container_name: apnileap_mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=smart_file_backup
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - apnileap_net
+
+  # ----------------------------------------------------------------------------
+  # Service 2: Smart File Backup App (Frontend + Backend + Algorithms)
+  # ----------------------------------------------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: dockerfile
+    container_name: apnileap_platform
+    restart: unless-stopped
+    ports:
+      - "5173:5173"   # React 18 SPA Frontend
+      - "4000:4000"   # Express BFF & Socket.IO Stream
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - MONGODB_URI=mongodb://mongodb:27017/smart_file_backup
+    depends_on:
+      - mongodb
+    volumes:
+      # Persistent volume for unique deduplicated physical chunks
+      - upload_data:/app/backend/data/uploads
+    networks:
+      - apnileap_net
+
+networks:
+  apnileap_net:
+    driver: bridge
+
+volumes:
+  mongo_data:
+    driver: local
+  upload_data:
+    driver: local
